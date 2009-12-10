@@ -19,6 +19,18 @@ def parse_opts():
                     default=10,
                     type=float,
                     help="cents to change pitch")
+  parser.add_option("-i", "--interval", dest="interval",
+                    default=0,
+                    type=int,
+                    help="interval (half steps)")
+  parser.add_option("-v", "--vary", dest="vary_center",
+                    default=0,
+                    type=int,
+                    help="vary first tone (half steps)")
+  parser.add_option('-t', "--vary-tone", dest="vary_insts",
+                    default=False,
+                    action="store_true",
+                    help="Vary instruments")
   options,args = parser.parse_args()
   if len(args) > 0:
     options.print_help()
@@ -26,8 +38,12 @@ def parse_opts():
   return options
 
 
-def play_tones(freq_a, freq_b):
-  subst = TEMPLATE.replace('@FREQ1', str(freq_a)).replace("@FREQ2", str(freq_b))
+def play_tones(freq_a, freq_b, vary_insts=False):
+  subst = (TEMPLATE
+    .replace('@FREQ1', str(freq_a))
+    .replace("@FREQ2", str(freq_b))
+    .replace('@INST1', "1")
+    .replace('@INST2', vary_insts and "2" or "1"))
   with NamedTemporaryFile(suffix=".csd") as f:
     f.write(subst)
     f.flush()
@@ -43,18 +59,19 @@ def get_correct_response(freq_a, freq_b):
   elif freq_a > freq_b:
     return '<'
 
-def run_test(center_freq, cents_diff):
-  choices = [center_freq,
-             center_freq*pow(2, float(cents_diff)/1200),
-             center_freq*pow(2, -float(cents_diff)/1200)]
+def run_test(center_freq, cents_diff, interval, vary_insts=False):
+  target_freq = center_freq * pow(2, float(interval)/12.0)
+  choices = [target_freq,
+             target_freq*pow(2, float(cents_diff)/1200),
+             target_freq*pow(2, -float(cents_diff)/1200)]
   freq_a = center_freq
   freq_b = random.choice(choices)
-  correct = get_correct_response(freq_a, freq_b)
+  correct = get_correct_response(target_freq, freq_b)
 
   repeat = True
   while repeat:
     repeat = False
-    play_tones(freq_a, freq_b)
+    play_tones(freq_a, freq_b, vary_insts=vary_insts)
     answer = raw_input("<|=|> ?").strip()
     if answer == correct:
       print "Right!"
@@ -66,8 +83,12 @@ def run_test(center_freq, cents_diff):
 def main():
   options = parse_opts()
   while True:
-    run_test(center_freq=options.center_freq,
-             cents_diff=options.cents_diff)
+    varied = options.center_freq * \
+      pow(2, float(random.randint(0, options.vary_center))/12)
+    run_test(center_freq=varied,
+             cents_diff=options.cents_diff,
+             interval=options.interval,
+             vary_insts=options.vary_insts)
 
 if __name__ == "__main__":
   main()

@@ -14,8 +14,8 @@ endin
 <CsScore>
 f1 0 16384  10 1 .5 .333333 .25 .2 .166667 .142857 
 f2 0 16384  10 1 ;.5 .333333  .25 .2 .166667 .142857 
-i1 0 0.75 @FREQ1 1
-i1 0.75 1.5 @FREQ2 2
+i1 0 0.75 @FREQ1 @INST1
+i1 0.75 1.5 @FREQ2 @INST2
 </CsScore>
 
 </CsoundSynthesizer>
