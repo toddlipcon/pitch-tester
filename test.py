@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 import subprocess
 import random
 import optparse
+import time
 import sys
 
 TEMPLATE=file("test.csd").read()
@@ -77,6 +78,11 @@ def run_test(center_freq, cents_diff, interval, vary_insts=False):
       print "Right!"
     elif answer in VALID_ANSWERS:
       print "Incorrect. Correct was: " + correct
+      print "Playing correct..."
+      play_tones(freq_a, target_freq)
+      time.sleep(0.5)
+      print "OK. Moving on....\n"
+
     else:
       repeat = True
 
